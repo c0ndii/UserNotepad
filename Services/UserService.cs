@@ -16,6 +16,7 @@ namespace UserNotepad.Services
     public class UserService : IUserService
     {
         private readonly AppDbContext _context;
+        private readonly ILogger _logger;
 
         private IEnumerable<UserAttribute>? MapAttributesFromInput(IEnumerable<UserAttributeInput>? attributes)
         {
@@ -34,9 +35,11 @@ namespace UserNotepad.Services
             return null;
         }
 
-        public UserService(AppDbContext context)
+        public UserService(AppDbContext context, ILogger logger)
         {
             this._context = context;
+            this._logger = logger;
+
         }
 
         public async Task AddUser(UserInput user)

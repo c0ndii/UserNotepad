@@ -12,7 +12,7 @@ using UserNotepad.Entities;
 namespace UserNotepad.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20251108135405_init")]
+    [Migration("20251108143852_init")]
     partial class init
     {
         /// <inheritdoc />
