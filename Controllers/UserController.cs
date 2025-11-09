@@ -4,7 +4,7 @@ using UserNotepad.Services;
 
 namespace UserNotepad.Controllers
 {
-    [Route("/api/user")]
+    [Route("/api/users")]
     [ApiController]
     public class UserController : ControllerBase
     {
@@ -39,24 +39,25 @@ namespace UserNotepad.Controllers
         [HttpPost]
         public async Task<IActionResult> AddUser([FromBody] UserInput user)
         {
-            await _userService.AddUser(user);
-            return Created();
+            var createdUser = await _userService.AddUser(user);
+            return CreatedAtAction(nameof(GetUser), new { id = createdUser.ID }, createdUser);
         }
 
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateUser([FromRoute] Guid id, [FromBody] UserInput user)
         {
-            if (await _userService.UpdateUser(id, user))
-                return NoContent();
-            return NotFound();
+            var updatedUser = await _userService.UpdateUser(id, user);
+            if (updatedUser is null)
+                return NotFound();
+            return Ok(updatedUser);
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteUser([FromRoute] Guid id)
         {
-            if (await _userService.RemoveUser(id))
-                return NoContent();
-            return NotFound();
+            if (await _userService.RemoveUser(id) is null)
+                return NotFound();
+            return NoContent();
         }
     }
 }

@@ -8,9 +8,9 @@ namespace UserNotepad.Services
     {
         public Task<IEnumerable<UserDto>> GetAllUsers();
         public Task<UserDto?> GetUser(Guid id);
-        public Task AddUser(UserInput user);
-        public Task<bool> UpdateUser(Guid id, UserInput user);
-        public Task<bool> RemoveUser(Guid id);
+        public Task<UserDto> AddUser(UserInput user);
+        public Task<UserDto?> UpdateUser(Guid id, UserInput user);
+        public Task<Guid?> RemoveUser(Guid id);
     }
 
     public class UserService : IUserService
@@ -27,43 +27,20 @@ namespace UserNotepad.Services
 
         public async Task<IEnumerable<UserDto>> GetAllUsers()
         {
-            return await _context.Users.Include(x => x.Attributes).Select(x => new UserDto
-            {
-                ID = x.ID,
-                Name = x.Name,
-                Surname = x.Surname,
-                BirthDate = x.BirthDate,
-                Sex = x.Sex,
-                Attributes = x.Attributes.Select(y => new UserAttributeDto
-                {
-                    Key = y.Key,
-                    Value = y.Value,
-                    ValueType = y.ValueType
-                }),
-            }).ToListAsync();
+            return await _context.Users.Include(x => x.Attributes).Select(x => MapUserFromDb(x)).ToListAsync();
         }
 
         public async Task<UserDto?> GetUser(Guid id)
         {
-            return await _context.Users.Include(x => x.Attributes)
-                .Where(x => x.ID == id)
-                .Select(x => new UserDto
-                {
-                    ID = x.ID,
-                    Name = x.Name,
-                    Surname = x.Surname,
-                    BirthDate = x.BirthDate,
-                    Sex = x.Sex,
-                    Attributes = x.Attributes.Select(y => new UserAttributeDto
-                    {
-                        Key = y.Key,
-                        Value = y.Value,
-                        ValueType = y.ValueType
-                    }),
-                }).SingleOrDefaultAsync();
+            var user = await _context.Users.Include(x => x.Attributes)
+                .SingleOrDefaultAsync(x => x.ID == id);
+
+            if (user is null)
+                return null;
+            return MapUserFromDb(user);
         }
 
-        public async Task AddUser(UserInput user)
+        public async Task<UserDto> AddUser(UserInput user)
         {
             var userToDb = new User
             {
@@ -78,13 +55,15 @@ namespace UserNotepad.Services
 
             await _context.Users.AddAsync(userToDb);
             await _context.SaveChangesAsync();
+
+            return MapUserFromDb(userToDb);
         }
 
-        public async Task<bool> UpdateUser(Guid id, UserInput user)
+        public async Task<UserDto?> UpdateUser(Guid id, UserInput user)
         {
             var dbUser = await _context.Users.SingleOrDefaultAsync(x => x.ID == id);
             if (dbUser is null)
-                return false;
+                return null;
 
             dbUser.Name = user.Name;
             dbUser.Surname = user.Surname;
@@ -125,31 +104,48 @@ namespace UserNotepad.Services
                 await _context.Attributes.AddRangeAsync(toAdd);
 
             await _context.SaveChangesAsync();
-            return true;
+            return MapUserFromDb(dbUser);
         }
 
-        public async Task<bool> RemoveUser(Guid id)
+        public async Task<Guid?> RemoveUser(Guid id)
         {
             var user = await _context.Users.SingleOrDefaultAsync(x => x.ID == id);
 
-            if (user is null) return false;
+            if (user is null) return null;
 
             _context.Users.Remove(user);
             await _context.SaveChangesAsync();
 
-            return true;
+            return user.ID;
         }
 
-        private ICollection<UserAttribute> MapAttributesFromInput(IEnumerable<UserAttributeInput> attributes)
+        private IEnumerable<UserAttribute> MapAttributesFromInput(IEnumerable<UserAttributeInput> attributes)
         {
             return attributes
-                .Where(x => x is not null)
                 .Select(x => new UserAttribute
                 {
                     Key = x.Key,
                     Value = x.Value,
                     ValueType = x.ValueType,
                 }).ToList();
+        }
+
+        private static UserDto MapUserFromDb(User user)
+        {
+            return new UserDto
+            {
+                ID = user.ID,
+                Name = user.Name,
+                Surname = user.Surname,
+                BirthDate = user.BirthDate,
+                Sex = user.Sex,
+                Attributes = user.Attributes.Select(x => new UserAttributeDto
+                {
+                    Key = x.Key,
+                    Value = x.Value,
+                    ValueType = x.ValueType
+                }).ToList()
+            };
         }
     }
 }
