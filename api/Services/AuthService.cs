@@ -15,7 +15,8 @@ namespace UserNotepad.Services
     public interface IAuthService
     {
         public Task Register(RegisterInput input, CancellationToken cancellationToken);
-        public Task<TokenDto> Login(LoginInput input, CancellationToken cancellationToken);
+        public Task<LoginDto?> Login(LoginInput input, CancellationToken cancellationToken);
+        public Task<OperatorDto?> Me(string username, CancellationToken cancellationToken);
     }
 
     public class AuthService : IAuthService
@@ -33,7 +34,7 @@ namespace UserNotepad.Services
             this._logger = logger;
         }
 
-        public async Task<TokenDto?> Login(LoginInput input, CancellationToken cancellationToken)
+        public async Task<LoginDto?> Login(LoginInput input, CancellationToken cancellationToken)
         {
             var operatorLogin = await _context.Operators.SingleOrDefaultAsync(x => x.Username == input.Username, cancellationToken);
             if (operatorLogin is null)
@@ -43,7 +44,7 @@ namespace UserNotepad.Services
             if (result == PasswordVerificationResult.Failed)
                 return null;
 
-            return GenerateJwtToken(operatorLogin.Username);
+            return GenerateJwtToken(operatorLogin);
         }
 
         public async Task Register(RegisterInput input, CancellationToken cancellationToken)
@@ -60,14 +61,23 @@ namespace UserNotepad.Services
             await _context.SaveChangesAsync(cancellationToken);
         }
 
-        private TokenDto GenerateJwtToken(string username)
+        public async Task<OperatorDto?> Me(string username, CancellationToken cancellationToken)
+        {
+            var exists = await _context.Operators.SingleOrDefaultAsync(x => x.Username == username, cancellationToken);
+            if (exists is not null)
+                return new OperatorDto { Nickname = exists.Nickname };
+
+            return null;
+        }
+
+        private LoginDto GenerateJwtToken(Operator op)
         {
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.Key));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
             var claims = new[]
             {
-                new Claim(JwtRegisteredClaimNames.Sub, username),
+                new Claim(JwtRegisteredClaimNames.Sub, op.Username),
                  new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
             };
 
@@ -81,10 +91,11 @@ namespace UserNotepad.Services
                 signingCredentials: creds
             );
 
-            return new TokenDto
+            return new LoginDto
             {
+                UserNickname = op.Nickname,
                 JwtToken = new JwtSecurityTokenHandler().WriteToken(token),
-                Exiration = expires
+                JwtExiration = expires
             };
         }
     }

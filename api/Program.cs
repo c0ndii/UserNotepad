@@ -27,9 +27,7 @@ try
 
     var jwtSettings = builder.Configuration.GetSection("Jwt").Get<Jwt>();
     if (jwtSettings is null)
-    {
-        throw new InvalidOperationException("Missing jwt settings in appsettings.json");
-    }
+        throw new InvalidOperationException("Missing jwt settings section in appsettings.json");
 
     builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options  =>
     {
@@ -53,11 +51,16 @@ try
     builder.Services.AddEndpointsApiExplorer();
     builder.Services.AddSwaggerGen();
 
+    var dbConnectionString = builder.Configuration.GetConnectionString("appDb");
+    if (dbConnectionString is null)
+        throw new InvalidOperationException("Missing database section in appsettings.json");
+
     builder.Services.AddDbContext<AppDbContext>(options =>
-        options.UseSqlServer(builder.Configuration.GetConnectionString("appDb")));
+        options.UseSqlServer(dbConnectionString));
 
     builder.Services.Configure<Jwt>(builder.Configuration.GetSection("Jwt"));
     builder.Services.AddScoped<ErrorHandlingMiddleware>();
+    builder.Services.AddHttpContextAccessor();
 
     builder.Services.AddScoped<IUserService, UserService>();
     builder.Services.AddScoped<IAuthService, AuthService>();
