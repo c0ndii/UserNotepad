@@ -8,6 +8,6 @@ namespace UserNotepad.Models
         required public string Surname { get; set; }
         required public DateTime BirthDate { get; set; }
         required public SexEnum Sex { get; set; }
-        public IEnumerable<UserAttributeInput>? Attributes { get; set; }
+        public IEnumerable<UserAttributeInput> Attributes { get; set; } = new List<UserAttributeInput>();
     }
 }

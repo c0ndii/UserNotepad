@@ -9,9 +9,9 @@ namespace UserNotepad.Controllers
     public class UserController : ControllerBase
     {
         private readonly IUserService _userService;
-        private readonly ILogger _logger;
+        private readonly ILogger<UserController> _logger;
 
-        public UserController(IUserService userService, ILogger logger)
+        public UserController(IUserService userService, ILogger<UserController> logger)
         {
             this._userService = userService;
             this._logger = logger;
@@ -20,13 +20,20 @@ namespace UserNotepad.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAllUsers()
         {
-            return Ok();
+            return Ok(await _userService.GetAllUsers());
         }
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetUser([FromRoute] Guid id)
         {
-            return Ok();
+            var user = await _userService.GetUser(id);
+
+            if (user is not null)
+            {
+                return Ok(user);
+            }
+
+            return NotFound();
         }
 
         [HttpPost]
@@ -39,13 +46,17 @@ namespace UserNotepad.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateUser([FromRoute] Guid id, [FromBody] UserInput user)
         {
-            return Ok();
+            if (await _userService.UpdateUser(id, user))
+                return NoContent();
+            return NotFound();
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteUser([FromRoute] Guid id)
         {
-            return Ok();
+            if (await _userService.RemoveUser(id))
+                return NoContent();
+            return NotFound();
         }
     }
 }

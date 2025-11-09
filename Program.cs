@@ -5,6 +5,7 @@ using NLog.Extensions.Logging;
 using NLog.Web;
 using UserNotepad.Entities;
 using UserNotepad.Filters;
+using UserNotepad.Middlewares;
 using UserNotepad.Models;
 using UserNotepad.Models.Validators;
 using UserNotepad.Services;
@@ -33,6 +34,7 @@ try
 
     builder.Services.AddScoped<IUserService, UserService>();
     builder.Services.AddScoped<IValidator<UserInput>, UserInputValidator>();
+    builder.Services.AddScoped<ErrorHandlingMiddleware>();
     builder.Services.AddScoped<IValidator<UserAttributeInput>, UserAttributeInputValidator>();
 
     var app = builder.Build();
@@ -46,6 +48,8 @@ try
     app.UseHttpsRedirection();
 
     app.UseAuthorization();
+
+    app.UseMiddleware<ErrorHandlingMiddleware>();
 
     app.MapControllers();
 

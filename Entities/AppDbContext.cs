@@ -25,7 +25,8 @@ namespace UserNotepad.Entities
             modelBuilder.Entity<UserAttribute>()
                 .HasOne(x => x.User)
                 .WithMany(x => x.Attributes)
-                .HasForeignKey(x => x.UserID);
+                .HasForeignKey(x => x.UserID)
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

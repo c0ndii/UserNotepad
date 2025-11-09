@@ -14,6 +14,14 @@ namespace UserNotepad.Models.Validators
                 .Matches(@"^[A-Za-z]+$").WithMessage("Surname can contain only letters!");
             RuleFor(x => x.BirthDate).NotEmpty().WithMessage("Birth date is required!")
                 .LessThan(DateTime.Now).WithMessage("Birth date can not be set in future!");
+            RuleFor(x => x.Attributes).Must(HaveUniqueKeys).WithMessage("Key value of attribute can not be duplicated!");
+        }
+
+        private bool HaveUniqueKeys(IEnumerable<UserAttributeInput> attributes)
+        {
+            if (attributes is null) return true;
+            var keys = attributes.Select(a => a.Key).ToList();
+            return keys.Distinct().Count() == keys.Count;
         }
     }
 }
