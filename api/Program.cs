@@ -20,6 +20,16 @@ try
 {
     var builder = WebApplication.CreateBuilder(args);
 
+    builder.Services.AddCors(options =>
+    {
+        options.AddPolicy("AllowUI", policy =>
+        {
+            policy.WithOrigins(@"http://localhost:5173")
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+            .AllowCredentials();
+        });
+    });
 
     builder.Logging.ClearProviders();
     builder.Logging.SetMinimumLevel(Microsoft.Extensions.Logging.LogLevel.Trace);
@@ -79,6 +89,8 @@ try
     }
 
     app.UseHttpsRedirection();
+
+    app.UseCors("AllowUI");
 
     app.UseAuthentication();
     app.UseAuthorization();
