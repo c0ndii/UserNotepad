@@ -41,7 +41,7 @@ export const RegisterForm = ({ onSuccess }: RegisterFormProps) => {
     formState: { errors },
   } = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
-    mode: "onChange",
+    mode: "all",
   });
 
   const onSubmit = async (data: RegisterFormValues) => {

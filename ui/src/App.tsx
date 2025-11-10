@@ -1,5 +1,5 @@
 import "./App.css";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { LoginPage } from "./pages/Login";
 import { RegisterPage } from "./pages/Register";
 import { NotepadPage } from "./pages/Notepad";
@@ -7,17 +7,58 @@ import { AuthProvider } from "./providers/AuthProvider";
 import { Navbar } from "./components/Navbar";
 import { Box, CircularProgress } from "@mui/material";
 import { useMe } from "./hooks/useMe";
+import type { ReactNode } from "react";
+import { useAuth } from "./hooks/useAuth";
 
 function Content() {
   const { isLoading } = useMe();
+
+  interface AuthGuardProps {
+    children: ReactNode;
+  }
+
+  const GuestOnly = ({ children }: AuthGuardProps) => {
+    const { user } = useAuth();
+    if (user) return <Navigate to="/" replace />;
+
+    return <>{children}</>;
+  };
+
+  const LoggedOnly = ({ children }: AuthGuardProps) => {
+    const { user } = useAuth();
+    if (!user) return <Navigate to="/login" replace />;
+
+    return <>{children}</>;
+  };
 
   if (isLoading) return <CircularProgress size={50} color="primary" />;
 
   return (
     <Routes>
-      <Route path="/login" element={<LoginPage />} />
-      <Route path="/register" element={<RegisterPage />} />
-      <Route path="/" element={<NotepadPage />} />
+      <Route
+        path="/login"
+        element={
+          <GuestOnly>
+            <LoginPage />
+          </GuestOnly>
+        }
+      />
+      <Route
+        path="/register"
+        element={
+          <GuestOnly>
+            <RegisterPage />
+          </GuestOnly>
+        }
+      />
+      <Route
+        path="/"
+        element={
+          <LoggedOnly>
+            <NotepadPage />
+          </LoggedOnly>
+        }
+      />
     </Routes>
   );
 }

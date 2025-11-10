@@ -1,15 +1,18 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import { AppBar, Box, Button, Toolbar, Typography } from "@mui/material";
+import { useSnackbar } from "../hooks/useSnackbar";
 
 export const Navbar = () => {
   const { user, setUser } = useAuth();
+  const { showMessage } = useSnackbar();
   const navigate = useNavigate();
 
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("tokenExpires");
     setUser(null);
+    showMessage("Logged out", "success");
     navigate("/login");
   };
 

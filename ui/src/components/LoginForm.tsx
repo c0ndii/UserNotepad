@@ -33,7 +33,7 @@ export const LoginForm = ({ onSuccess }: LoginFormProps) => {
     formState: { errors },
   } = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
-    mode: "onChange",
+    mode: "all",
   });
 
   const onSubmit = async (data: LoginFormValues) => {
