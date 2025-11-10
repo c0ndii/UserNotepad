@@ -1,41 +1,57 @@
-// src/components/Navbar.tsx
-import { Link } from "react-router-dom";
-import { useMe } from "../hooks/useMe";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../hooks/useAuth";
+import { AppBar, Box, Button, Toolbar, Typography } from "@mui/material";
 
 export const Navbar = () => {
-  const { data: user } = useMe();
+  const { user, setUser } = useAuth();
+  const navigate = useNavigate();
 
   const handleLogout = () => {
     localStorage.removeItem("token");
-    localStorage.removeItem("nickname");
-    window.location.href = "/login";
+    localStorage.removeItem("tokenExpires");
+    setUser(null);
+    navigate("/login");
   };
 
   return (
-    <nav className="bg-blue-500 text-white p-4 flex justify-between">
-      <div className="font-bold">UserNotepad</div>
-      <div>
-        {user ? (
-          <>
-            <span className="mr-4">Witaj, {user.nickname}</span>
-            <button
-              onClick={handleLogout}
-              className="bg-white text-blue-500 px-3 py-1 rounded"
-            >
-              Wyloguj
-            </button>
-          </>
-        ) : (
-          <>
-            <Link to="/login" className="mr-4 hover:underline">
-              Login
-            </Link>
-            <Link to="/register" className="hover:underline">
-              Register
-            </Link>
-          </>
-        )}
-      </div>
-    </nav>
+    <Box sx={{ flexGrow: 0 }}>
+      <AppBar position="static" color="primary">
+        <Toolbar sx={{ display: "flex", justifyContent: "space-between" }}>
+          <Typography
+            variant="h6"
+            component={Link}
+            to="/"
+            sx={{ color: "inherit", textDecoration: "none" }}
+          >
+            UserNotepad
+          </Typography>
+
+          <Box>
+            {!user ? (
+              <>
+                <Button color="inherit" component={Link} to="/login">
+                  Login
+                </Button>
+                <Button color="inherit" component={Link} to="/register">
+                  Register
+                </Button>
+              </>
+            ) : (
+              <>
+                <Typography
+                  variant="body1"
+                  sx={{ mr: 2, display: "inline-block" }}
+                >
+                  Welcome, <strong>{user.nickname}</strong>
+                </Typography>
+                <Button color="inherit" onClick={handleLogout}>
+                  Logout
+                </Button>
+              </>
+            )}
+          </Box>
+        </Toolbar>
+      </AppBar>
+    </Box>
   );
 };

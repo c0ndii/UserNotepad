@@ -7,6 +7,8 @@ import { LoginPage } from "./pages/Login";
 import { RegisterPage } from "./pages/Register";
 import { NotepadPage } from "./pages/Notepad";
 import { AuthProvider } from "./providers/AuthProvider";
+import { Navbar } from "./components/Navbar";
+import { Box } from "@mui/material";
 
 function Content() {
   const { setUser } = useAuth();
@@ -33,7 +35,14 @@ function App() {
   return (
     <AuthProvider>
       <BrowserRouter>
-        <Content />
+        <Box
+          sx={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}
+        >
+          <Navbar />
+          <Box sx={{ flexGrow: 1 }}>
+            <Content />
+          </Box>
+        </Box>
       </BrowserRouter>
     </AuthProvider>
   );
