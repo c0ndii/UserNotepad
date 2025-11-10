@@ -17,6 +17,7 @@ namespace UserNotepad.Services
         public Task Register(RegisterInput input, CancellationToken cancellationToken);
         public Task<LoginDto?> Login(LoginInput input, CancellationToken cancellationToken);
         public Task<OperatorDto?> Me(string username, CancellationToken cancellationToken);
+        public Task<bool> IsUsernameTaken(string username, CancellationToken cancellationToken);
     }
 
     public class AuthService : IAuthService
@@ -68,6 +69,11 @@ namespace UserNotepad.Services
                 return new OperatorDto { Nickname = exists.Nickname };
 
             return null;
+        }
+
+        public async Task<bool> IsUsernameTaken(string username, CancellationToken cancellationToken)
+        {
+            return await _context.Operators.AnyAsync(x => x.Username == username, cancellationToken);
         }
 
         private LoginDto GenerateJwtToken(Operator op)

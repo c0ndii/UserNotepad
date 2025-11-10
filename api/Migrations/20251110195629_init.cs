@@ -16,8 +16,8 @@ namespace UserNotepad.Migrations
                 columns: table => new
                 {
                     ID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Username = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     Nickname = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Username = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     PasswordHash = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
@@ -65,6 +65,12 @@ namespace UserNotepad.Migrations
                 name: "IX_Attributes_UserID",
                 table: "Attributes",
                 column: "UserID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Operators_Username",
+                table: "Operators",
+                column: "Username",
+                unique: true);
         }
 
         /// <inheritdoc />

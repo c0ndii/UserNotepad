@@ -1,19 +1,13 @@
 ﻿using FluentValidation;
-using Microsoft.EntityFrameworkCore;
-using UserNotepad.Entities;
 
 namespace UserNotepad.Models.Validators
 {
     public class RegisterInputValidator : AbstractValidator<RegisterInput>
     {
-        public RegisterInputValidator(AppDbContext _context)
+        public RegisterInputValidator()
         {
             RuleFor(x => x.Username)
-                .NotEmpty().WithMessage("Username is required!")
-                .MustAsync(async (username, cancellation) =>
-                 {
-                     return !await _context.Operators.AnyAsync(x => x.Username == username, cancellation);
-                }).WithMessage("Username already taken!").WithErrorCode("409");
+                .NotEmpty().WithMessage("Username is required!");
             RuleFor(x => x.Nickname).NotEmpty().WithMessage("Nickname is required!");
             RuleFor(x => x.Password)
                 .NotEmpty().WithMessage("Password is required!")

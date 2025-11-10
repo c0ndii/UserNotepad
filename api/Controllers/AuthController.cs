@@ -27,6 +27,9 @@ namespace UserNotepad.Controllers
         [HttpPost("register")]
         public async Task<IActionResult> Register(RegisterInput input, CancellationToken cancellationToken)
         {
+            if (await _authService.IsUsernameTaken(input.Username, cancellationToken))
+                return Conflict();
+
             await _authService.Register(input, cancellationToken);
 
             return Ok();
@@ -48,7 +51,7 @@ namespace UserNotepad.Controllers
 
             try
             {
-                username = _contextAccessor.HttpContext?.User?.FindFirst(ClaimTypes.Name)?.Value;
+                username = _contextAccessor.HttpContext?.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             } catch
             {
                 return Unauthorized();

@@ -1,26 +1,17 @@
-import { useEffect } from "react";
 import "./App.css";
-import { useAuth } from "./hooks/useAuth";
-import { useMe } from "./hooks/useMe";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { LoginPage } from "./pages/Login";
 import { RegisterPage } from "./pages/Register";
 import { NotepadPage } from "./pages/Notepad";
 import { AuthProvider } from "./providers/AuthProvider";
 import { Navbar } from "./components/Navbar";
-import { Box } from "@mui/material";
+import { Box, CircularProgress } from "@mui/material";
+import { useMe } from "./hooks/useMe";
 
 function Content() {
-  const { setUser } = useAuth();
-  const { data, isLoading } = useMe();
+  const { isLoading } = useMe();
 
-  useEffect(() => {
-    if (data) {
-      setUser(data);
-    }
-  }, [data, setUser]);
-
-  if (isLoading) return <div>Loading...</div>;
+  if (isLoading) return <CircularProgress size={50} color="primary" />;
 
   return (
     <Routes>
@@ -39,7 +30,15 @@ function App() {
           sx={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}
         >
           <Navbar />
-          <Box sx={{ flexGrow: 1 }}>
+          <Box
+            sx={{
+              flexGrow: 1,
+              minHeight: "calc(100vh - 64px)",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
             <Content />
           </Box>
         </Box>

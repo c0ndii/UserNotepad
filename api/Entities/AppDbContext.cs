@@ -31,6 +31,9 @@ namespace UserNotepad.Entities
 
             modelBuilder.Entity<Operator>()
                 .HasKey(x => x.ID);
+            modelBuilder.Entity<Operator>()
+                .HasIndex(x => x.Username)
+                .IsUnique();
         }
     }
 }

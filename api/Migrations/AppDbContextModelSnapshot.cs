@@ -38,9 +38,12 @@ namespace UserNotepad.Migrations
 
                     b.Property<string>("Username")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.HasKey("ID");
+
+                    b.HasIndex("Username")
+                        .IsUnique();
 
                     b.ToTable("Operators");
                 });

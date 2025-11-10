@@ -5,59 +5,45 @@ import {
   Typography,
   CircularProgress,
 } from "@mui/material";
-import { useRegister } from "../hooks/useRegister";
 import { useSnackbar } from "../hooks/useSnackbar";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { theme } from "../main";
-import type { AxiosError } from "axios";
+import { useLogin } from "../hooks/useLogin";
 
-const registerSchema = z
-  .object({
-    username: z.string().nonempty("Username is required"),
-    nickname: z.string().nonempty("Nickname is required"),
-    password: z.string().min(8, "Password must be at least 8 characters"),
-    repeatPassword: z.string().min(8, "Password must be equal"),
-  })
-  .refine((data) => data.password === data.repeatPassword, {
-    message: "Password must be equal",
-    path: ["repeatPassword"],
-  });
+const loginSchema = z.object({
+  username: z.string().nonempty("Username is required"),
+  password: z.string().nonempty("Password is required"),
+});
 
-type RegisterFormValues = z.infer<typeof registerSchema>;
+type LoginFormValues = z.infer<typeof loginSchema>;
 
-interface RegisterFormProps {
+interface LoginFormProps {
   onSuccess?: () => void;
 }
 
-export const RegisterForm = ({ onSuccess }: RegisterFormProps) => {
-  const { mutateAsync, isPending } = useRegister();
+export const LoginForm = ({ onSuccess }: LoginFormProps) => {
+  const { mutateAsync, isPending } = useLogin();
   const { showMessage } = useSnackbar();
 
   const {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<RegisterFormValues>({
-    resolver: zodResolver(registerSchema),
+  } = useForm<LoginFormValues>({
+    resolver: zodResolver(loginSchema),
     mode: "onChange",
   });
 
-  const onSubmit = async (data: RegisterFormValues) => {
+  const onSubmit = async (data: LoginFormValues) => {
     try {
       await mutateAsync(data);
-      showMessage("Operator registered", "success");
+      showMessage("Login successful", "success");
       if (onSuccess) {
         onSuccess();
       }
-    } catch (error) {
-      const axiosError = error as AxiosError;
-      if (axiosError.response?.status === 409) {
-        showMessage("Username is already taken", "warning");
-        return;
-      }
-
+    } catch (error: unknown) {
       showMessage("Error occured", "error");
       console.log(error);
     }
@@ -82,7 +68,7 @@ export const RegisterForm = ({ onSuccess }: RegisterFormProps) => {
       noValidate
     >
       <Typography variant="h5" className="pb-4 text-center font-semibold">
-        Register
+        Login
       </Typography>
 
       <Box className="flex flex-col gap-4">
@@ -94,26 +80,11 @@ export const RegisterForm = ({ onSuccess }: RegisterFormProps) => {
           fullWidth
         />
         <TextField
-          label="Nickname"
-          {...register("nickname")}
-          error={!!errors.nickname}
-          helperText={errors.nickname?.message}
-          fullWidth
-        />
-        <TextField
           label="Password"
           type="password"
           {...register("password")}
           error={!!errors.password}
           helperText={errors.password?.message}
-          fullWidth
-        />
-        <TextField
-          label="Repeat password"
-          type="password"
-          {...register("repeatPassword")}
-          error={!!errors.repeatPassword}
-          helperText={errors.repeatPassword?.message}
           fullWidth
         />
 

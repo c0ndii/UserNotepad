@@ -12,7 +12,7 @@ using UserNotepad.Entities;
 namespace UserNotepad.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20251109174101_init")]
+    [Migration("20251110195629_init")]
     partial class init
     {
         /// <inheritdoc />
@@ -41,9 +41,12 @@ namespace UserNotepad.Migrations
 
                     b.Property<string>("Username")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.HasKey("ID");
+
+                    b.HasIndex("Username")
+                        .IsUnique();
 
                     b.ToTable("Operators");
                 });
