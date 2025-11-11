@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using UserNotepad.Models;
 using UserNotepad.Services;
 
@@ -6,6 +7,7 @@ namespace UserNotepad.Controllers
 {
     [Route("/api/users")]
     [ApiController]
+    [Authorize]
     public class UserController : ControllerBase
     {
         private readonly IUserService _userService;
