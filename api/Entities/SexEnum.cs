@@ -4,6 +4,6 @@
     {
         Male,
         Female,
-        Not_willing_to_share,
+        Other,
     }
 }

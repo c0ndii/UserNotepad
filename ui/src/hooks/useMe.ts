@@ -6,6 +6,12 @@ export interface MeResponse {
 }
 
 export const useMe = () => {
+  const tokenExpires = localStorage.getItem("tokenExpires");
+  let refetchInterval = 0;
+  if (tokenExpires) {
+    refetchInterval = new Date(tokenExpires).getTime() - Date.now() + 60000;
+  }
+
   return useQuery<MeResponse>({
     queryKey: ["me"],
     queryFn: async () => {
@@ -14,6 +20,7 @@ export const useMe = () => {
     },
     retry: false,
     staleTime: 5 * 60 * 1000,
+    refetchInterval: refetchInterval > 0 ? refetchInterval : false,
     refetchOnWindowFocus: false,
     refetchOnMount: false,
   });

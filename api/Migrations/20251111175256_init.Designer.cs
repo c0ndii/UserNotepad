@@ -12,7 +12,7 @@ using UserNotepad.Entities;
 namespace UserNotepad.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20251110195629_init")]
+    [Migration("20251111175256_init")]
     partial class init
     {
         /// <inheritdoc />
@@ -58,6 +58,9 @@ namespace UserNotepad.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("BirthDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Name")

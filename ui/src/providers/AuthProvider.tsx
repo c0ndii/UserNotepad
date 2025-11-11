@@ -7,6 +7,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<MeResponse | null>(null);
 
   useEffect(() => {
+    if (!localStorage.getItem("token")) {
+      return;
+    }
     (async () => {
       try {
         const res = await api.get<MeResponse>("/me");

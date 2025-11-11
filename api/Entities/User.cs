@@ -7,6 +7,7 @@
         public required string Surname { get; set; }
         public required DateTime BirthDate {  get; set; }
         public required SexEnum Sex { get; set; }
+        public DateTime CreatedAt {  get; set; } = DateTime.UtcNow;
         public IEnumerable<UserAttribute> Attributes { get; set; } = new List<UserAttribute>();
     }
 }

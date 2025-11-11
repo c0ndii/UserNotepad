@@ -18,9 +18,14 @@ namespace UserNotepad.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAllUsers(CancellationToken cancellationToken)
+        public async Task<IActionResult> GetAllUsers(CancellationToken cancellationToken, 
+            [FromQuery] int page = 1, [FromQuery] int pageSize = 10)
         {
-            return Ok(await _userService.GetAllUsers(cancellationToken));
+            return Ok(await _userService.GetAllUsers(new PageInput
+            {
+                Page = page,
+                PageSize = pageSize,
+            }, cancellationToken));
         }
 
         [HttpGet("{id}")]

@@ -6,7 +6,7 @@ namespace UserNotepad.Services
 {
     public interface IUserService
     {
-        public Task<IEnumerable<UserDto>> GetAllUsers(CancellationToken cancellationToken);
+        public Task<PageDto<UserDto>> GetAllUsers(PageInput pageRequest, CancellationToken cancellationToken);
         public Task<UserDto?> GetUser(Guid id, CancellationToken cancellationToken);
         public Task<UserDto> AddUser(UserInput user, CancellationToken cancellationToken);
         public Task<UserDto?> UpdateUser(Guid id, UserInput user, CancellationToken cancellationToken);
@@ -25,9 +25,26 @@ namespace UserNotepad.Services
 
         }
 
-        public async Task<IEnumerable<UserDto>> GetAllUsers(CancellationToken cancellationToken)
+        public async Task<PageDto<UserDto>> GetAllUsers(PageInput pageRequest, CancellationToken cancellationToken)
         {
-            return await _context.Users.Include(x => x.Attributes).Select(x => MapUserFromDb(x)).ToListAsync(cancellationToken);
+            var query = _context.Users.Include(x => x.Attributes).AsQueryable();
+
+            var totalCount = await query.CountAsync();
+
+            var users = await query
+                .OrderBy(x => x.CreatedAt)
+                .Skip((pageRequest.Page - 1) * pageRequest.PageSize)
+                .Take(pageRequest.PageSize)
+                .Select(x => MapUserFromDb(x))
+                .ToListAsync(cancellationToken);
+
+            return new PageDto<UserDto>
+            {
+                Items = users,
+                TotalCount = totalCount,
+                Page = pageRequest.Page,
+                PageSize = pageRequest.PageSize
+            };
         }
 
         public async Task<UserDto?> GetUser(Guid id, CancellationToken cancellationToken)

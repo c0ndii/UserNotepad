@@ -101,7 +101,7 @@ namespace UserNotepad.Services
             {
                 UserNickname = op.Nickname,
                 JwtToken = new JwtSecurityTokenHandler().WriteToken(token),
-                JwtExiration = expires
+                JwtExpiration = expires
             };
         }
     }

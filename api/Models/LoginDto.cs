@@ -4,6 +4,6 @@
     {
         public required string UserNickname { get; set; }
         public required string JwtToken { get; set; }
-        public required DateTime JwtExiration {  get; set; }
+        public required DateTime JwtExpiration {  get; set; }
     }
 }

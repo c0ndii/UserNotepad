@@ -76,8 +76,9 @@ function App() {
               flexGrow: 1,
               minHeight: "calc(100vh - 64px)",
               display: "flex",
-              justifyContent: "center",
               alignItems: "center",
+              flexDirection: "column",
+              padding: 2,
             }}
           >
             <Content />

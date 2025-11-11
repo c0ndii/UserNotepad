@@ -23,8 +23,8 @@ export const useLogin = () => {
     },
     onSuccess: (data) => {
       localStorage.setItem("token", data.jwtToken);
+      console.log(data.jwtExpiration);
       localStorage.setItem("tokenExpires", data.jwtExpiration);
-      // api.defaults.headers.common["Authorization"] = `Bearer ${data.jwtToken}`;
       setUser({ nickname: data.userNickname });
     },
   });
