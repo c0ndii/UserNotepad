@@ -6,33 +6,27 @@ import { NotepadPage } from "./pages/Notepad";
 import { AuthProvider } from "./providers/AuthProvider";
 import { Navbar } from "./components/Navbar";
 import { Box, CircularProgress } from "@mui/material";
-import { useMe } from "./hooks/useMe";
 import type { ReactNode } from "react";
 import { useAuth } from "./hooks/useAuth";
 
 function Content() {
-  const { isLoading } = useMe();
+  const { user, isLoading } = useAuth();
 
-  interface AuthGuardProps {
-    children: ReactNode;
-  }
+  const LoggedOnly = ({ children }: { children: ReactNode }) => {
+    if (isLoading) return <CircularProgress size={50} color="primary" />;
 
-  const GuestOnly = ({ children }: AuthGuardProps) => {
-    const { user } = useAuth();
-
-    if (user) return <Navigate to="/" replace />;
-
-    return <>{children}</>;
-  };
-
-  const LoggedOnly = ({ children }: AuthGuardProps) => {
-    const { user } = useAuth();
     if (!user) return <Navigate to="/login" replace />;
 
     return <>{children}</>;
   };
 
-  if (isLoading) return <CircularProgress size={50} color="primary" />;
+  const GuestOnly = ({ children }: { children: ReactNode }) => {
+    if (isLoading) return <CircularProgress size={50} color="primary" />;
+
+    if (user) return <Navigate to="/" replace />;
+
+    return <>{children}</>;
+  };
 
   return (
     <Routes>

@@ -1,28 +1,27 @@
 import { useEffect, useState, type ReactNode } from "react";
-import type { MeResponse } from "../hooks/useMe";
+import { useMe, type MeResponse } from "../hooks/useMe";
 import { AuthContext } from "../contexts/AuthContext";
-import { api } from "../api/api";
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
+  const { data, isLoading, isError } = useMe();
   const [user, setUser] = useState<MeResponse | null>(null);
+  const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    if (!localStorage.getItem("token")) {
-      return;
+    if (isLoading) return;
+
+    if (isError || !data) {
+      localStorage.removeItem("token");
+      setUser(null);
+    } else {
+      setUser(data);
     }
-    (async () => {
-      try {
-        const res = await api.get<MeResponse>("/me");
-        setUser(res.data);
-      } catch {
-        localStorage.removeItem("token");
-        setUser(null);
-      }
-    })();
-  }, []);
+
+    setReady(true);
+  }, [data, isLoading, isError]);
 
   return (
-    <AuthContext.Provider value={{ user, setUser }}>
+    <AuthContext.Provider value={{ user, setUser, isLoading: !ready }}>
       {children}
     </AuthContext.Provider>
   );
