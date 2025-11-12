@@ -326,6 +326,11 @@ export const UserModal = ({ open, onClose, userId }: UserModalProps) => {
                       </Typography>
                     )}
                   </Grid>
+                  {errors.attributes?.message && (
+                    <Typography color="error" variant="caption">
+                      {errors.attributes.message}
+                    </Typography>
+                  )}
 
                   <Grid>
                     <IconButton onClick={() => remove(index)}>
@@ -335,6 +340,14 @@ export const UserModal = ({ open, onClose, userId }: UserModalProps) => {
                 </Grid>
               ))}
             </Stack>
+
+            {errors.attributes &&
+              typeof errors.attributes === "object" &&
+              "message" in errors.attributes && (
+                <Typography color="error" variant="caption" sx={{ mt: 1 }}>
+                  {errors.attributes.message}
+                </Typography>
+              )}
 
             <Button
               sx={{ mt: 2 }}

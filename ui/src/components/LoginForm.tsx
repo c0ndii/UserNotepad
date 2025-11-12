@@ -11,6 +11,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { theme } from "../main";
 import { useLogin } from "../hooks/useLogin";
+import type { AxiosError } from "axios";
 
 const loginSchema = z.object({
   username: z.string().nonempty("Username is required"),
@@ -43,7 +44,12 @@ export const LoginForm = ({ onSuccess }: LoginFormProps) => {
       if (onSuccess) {
         onSuccess();
       }
-    } catch (error: unknown) {
+    } catch (error) {
+      const axiosError = error as AxiosError;
+      if (axiosError.response?.status === 401) {
+        showMessage("Wrong username or password!", "warning");
+        return;
+      }
       showMessage("Error occured", "error");
       console.log(error);
     }

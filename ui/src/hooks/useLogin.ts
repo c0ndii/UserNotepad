@@ -23,7 +23,6 @@ export const useLogin = () => {
     },
     onSuccess: (data) => {
       localStorage.setItem("token", data.jwtToken);
-      console.log(data.jwtExpiration);
       localStorage.setItem("tokenExpires", data.jwtExpiration);
       setUser({ nickname: data.userNickname });
     },
