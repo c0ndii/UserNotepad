@@ -10,15 +10,33 @@ import {
   CircularProgress,
   Box,
 } from "@mui/material";
-import { useUsers } from "../hooks/useUsers";
+import { useGetUsers } from "../hooks/useGetUsers";
 import { theme } from "../main";
 import { formatSex } from "../helpers/sexHelper";
+import { useState } from "react";
+import { UserModal } from "./UserModal";
 
 export const UsersTable = () => {
-  const { users, totalCount, page, pageSize, setPage, isLoading } = useUsers();
+  const { users, totalCount, page, pageSize, setPage, isLoading } =
+    useGetUsers();
+
+  const [selectedUserId, setSelectedUserId] = useState<string | undefined>(
+    undefined
+  );
+  const [modalOpen, setModalOpen] = useState(false);
 
   const handleChangePage = (_event: unknown, newPage: number) => {
     setPage(newPage + 1);
+  };
+
+  const handleRowClick = (id: string) => {
+    setSelectedUserId(id);
+    setModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setModalOpen(false);
+    setSelectedUserId(undefined);
   };
 
   if (isLoading) {
@@ -96,7 +114,17 @@ export const UsersTable = () => {
           </TableHead>
           <TableBody>
             {users.map((user) => (
-              <TableRow key={user.id}>
+              <TableRow
+                key={user.id}
+                sx={{
+                  cursor: "pointer",
+                  "&:hover": {
+                    backgroundColor: theme.palette.secondary.main,
+                    color: "#fff",
+                  },
+                }}
+                onClick={() => handleRowClick(user.id)}
+              >
                 <TableCell>{user.name}</TableCell>
                 <TableCell>{user.surname}</TableCell>
                 <TableCell>
@@ -132,6 +160,13 @@ export const UsersTable = () => {
         rowsPerPage={pageSize}
         rowsPerPageOptions={[pageSize]}
       />
+      {modalOpen && (
+        <UserModal
+          open={modalOpen}
+          onClose={handleCloseModal}
+          userId={selectedUserId}
+        />
+      )}
     </Box>
   );
 };

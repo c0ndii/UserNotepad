@@ -33,3 +33,11 @@ export interface PageDto<T> {
   page: number;
   pageSize: number;
 }
+
+export interface UserInput {
+  name: string;
+  surname: string;
+  birthDate: string;
+  sex: SexEnum;
+  attributes?: UserAttributeDto[];
+}

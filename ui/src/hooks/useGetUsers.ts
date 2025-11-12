@@ -5,7 +5,7 @@ import type { PageDto, UserDto } from "../types/user";
 
 const PAGE_SIZE = 10;
 
-export const useUsers = () => {
+export const useGetUsers = () => {
   const [searchParams, setSearchParams] = useSearchParams();
 
   const page = Number(searchParams.get("page") || 1);
