@@ -48,20 +48,17 @@ const userSchema = z.object({
       return date <= today;
     }, "Birth date cannot be in the future"),
   sex: z.number().int(),
-  attributes: z
-    .array(attributeSchema)
-    .optional()
-    .refine(
-      (attrs) => {
-        if (!attrs) return true;
-        const keys = attrs.filter((a) => a.key).map((a) => a.key);
-        return keys.length === new Set(keys).size;
-      },
-      {
+  attributes: z.array(attributeSchema).superRefine((attrs, ctx) => {
+    const keys = attrs.map((a) => a.key).filter(Boolean);
+    const duplicates = keys.filter((key, idx) => keys.indexOf(key) !== idx);
+    if (duplicates.length) {
+      ctx.addIssue({
+        code: "custom",
         message: "Attribute keys must be unique",
-        path: ["attributes"],
-      }
-    ),
+        path: ["root"],
+      });
+    }
+  }),
 });
 
 type UserForm = z.infer<typeof userSchema>;
@@ -85,6 +82,7 @@ export const UserModal = ({ open, onClose, userId }: UserModalProps) => {
     handleSubmit,
     reset,
     watch,
+    trigger,
     formState: { errors },
   } = useForm<UserForm>({
     resolver: zodResolver(userSchema),
@@ -96,6 +94,7 @@ export const UserModal = ({ open, onClose, userId }: UserModalProps) => {
       attributes: [],
     },
     mode: "all",
+    reValidateMode: "onChange",
   });
 
   const { fields, append, remove } = useFieldArray({
@@ -175,7 +174,13 @@ export const UserModal = ({ open, onClose, userId }: UserModalProps) => {
             name={`attributes.${index}.value`}
             control={control}
             render={({ field }) => (
-              <TextField type="date" label="Value" fullWidth {...field} />
+              <TextField
+                type="date"
+                label="Value"
+                fullWidth
+                slotProps={{ inputLabel: { shrink: true } }}
+                {...field}
+              />
             )}
           />
         );
@@ -281,7 +286,12 @@ export const UserModal = ({ open, onClose, userId }: UserModalProps) => {
 
             <Stack spacing={3} sx={{ mt: 1 }}>
               {fields.map((field, index) => (
-                <Grid container spacing={2} key={field.id} alignItems="center">
+                <Grid
+                  container
+                  spacing={2}
+                  key={field.id}
+                  alignItems="flex-start"
+                >
                   <Grid>
                     <Controller
                       name={`attributes.${index}.key`}
@@ -292,6 +302,10 @@ export const UserModal = ({ open, onClose, userId }: UserModalProps) => {
                           label="Key"
                           error={!!errors.attributes?.[index]?.key}
                           {...field}
+                          onChange={(e) => {
+                            field.onChange(e);
+                            trigger("attributes");
+                          }}
                         />
                       )}
                     />
@@ -341,13 +355,12 @@ export const UserModal = ({ open, onClose, userId }: UserModalProps) => {
               ))}
             </Stack>
 
-            {errors.attributes &&
-              typeof errors.attributes === "object" &&
-              "message" in errors.attributes && (
-                <Typography color="error" variant="caption" sx={{ mt: 1 }}>
-                  {errors.attributes.message}
-                </Typography>
-              )}
+            {errors.attributes?.root?.message && (
+              <Typography color="error" variant="caption" sx={{ mt: 1 }}>
+                {errors.attributes.root.message}
+              </Typography>
+            )}
+            <br />
 
             <Button
               sx={{ mt: 2 }}
