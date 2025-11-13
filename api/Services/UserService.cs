@@ -1,4 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using QuestPDF.Fluent;
+using QuestPDF.Helpers;
+using QuestPDF.Infrastructure;
 using UserNotepad.Entities;
 using UserNotepad.Models;
 
@@ -11,6 +15,7 @@ namespace UserNotepad.Services
         public Task<UserDto> AddUser(UserInput user, CancellationToken cancellationToken);
         public Task<UserDto?> UpdateUser(Guid id, UserInput user, CancellationToken cancellationToken);
         public Task<Guid?> RemoveUser(Guid id, CancellationToken cancellationToken);
+        public Task<byte[]> GetReport(DateTime generationDateTime, CancellationToken cancellationToken);
     }
 
     public class UserService : IUserService
@@ -22,7 +27,6 @@ namespace UserNotepad.Services
         {
             this._context = context;
             this._logger = logger;
-
         }
 
         public async Task<PageDto<UserDto>> GetAllUsers(PageInput pageRequest, CancellationToken cancellationToken)
@@ -135,6 +139,108 @@ namespace UserNotepad.Services
             await _context.SaveChangesAsync();
 
             return user.ID;
+        }
+
+        public async Task<byte[]> GetReport(DateTime generationDateTime, CancellationToken cancellationToken)
+        {
+            var users = await _context.Users.Include(x => x.Attributes).ToListAsync(cancellationToken);
+
+            var report = Document.Create(doc =>
+            {
+                doc.Page(page =>
+                {
+                    page.Size(PageSizes.A4);
+                    page.Margin(20);
+                    page.Header()
+                        .Text($"Users report, \ngenerated: {generationDateTime:dd-MM-yyyy HH:mm:ss} UTC")
+                        .FontSize(24)
+                        .Bold();
+
+                    page.DefaultTextStyle(x => x.FontSize(10));
+                    page.Content().PaddingVertical(10).Table(table =>
+                    {
+                        table.ColumnsDefinition(columns =>
+                        {
+                            columns.ConstantColumn(30);  
+                            columns.RelativeColumn(1.5f); 
+                            columns.RelativeColumn(1.5f); 
+                            columns.RelativeColumn(1);   
+                            columns.RelativeColumn(0.8f); 
+                            columns.RelativeColumn(4);  
+                        });
+
+                        table.Header(header =>
+                        {
+                            header.Cell().Element(CellHeaderStyle).Text("#").AlignStart();
+                            header.Cell().Element(CellHeaderStyle).Text("Name").AlignStart();
+                            header.Cell().Element(CellHeaderStyle).Text("Surname").AlignStart();
+                            header.Cell().Element(CellHeaderStyle).Text("Birth Date").AlignStart();
+                            header.Cell().Element(CellHeaderStyle).Text("Sex").AlignStart();
+                            header.Cell().Element(CellHeaderStyle).Text("Attributes").AlignStart();
+
+                            static IContainer CellHeaderStyle(IContainer container)
+                            {
+                                return container
+                                    .Background(Colors.Grey.Lighten3)
+                                    .Padding(4)
+                                    .Border(1)
+                                    .BorderColor(Colors.Grey.Lighten2)
+                                    .DefaultTextStyle(x => x.SemiBold());
+                            }
+                        });
+
+                        int i = 1;
+                        foreach (var user in users)
+                        {
+                            table.Cell().Element(CellBodyStyle).Text(i++.ToString());
+                            table.Cell().Element(CellBodyStyle).Text(user.Name);
+                            table.Cell().Element(CellBodyStyle).Text(user.Surname);
+                            table.Cell().Element(CellBodyStyle).Text(user.BirthDate.ToString("dd-MM-yyyy"));
+                            table.Cell().Element(CellBodyStyle).Text(user.Sex.ToString());
+
+                            var attrSummary = user.Attributes.Any()
+                                ? string.Join(", ", user.Attributes.Select(a =>
+                                {
+                                    string formattedValue = a.ValueType switch
+                                    {
+                                        AttributeTypeEnum.@DateTime => DateTime.TryParse(a.Value, out var dt)
+                                                                      ? dt.ToString("dd-MM-yyyy")
+                                                                      : a.Value,
+                                        AttributeTypeEnum.@bool => bool.TryParse(a.Value, out var b) ? b.ToString() : a.Value,
+                                        AttributeTypeEnum.@double => double.TryParse(a.Value, out var d) ? d.ToString() : a.Value,
+                                        AttributeTypeEnum.@int => int.TryParse(a.Value, out var i) ? i.ToString() : a.Value,
+                                        _ => a.Value
+                                    };
+
+                                    return $"{a.Key}: {formattedValue}";
+                                }))
+                                : "-";
+
+                            table.Cell().Element(CellBodyStyle).Text(attrSummary);
+
+                            static IContainer CellBodyStyle(IContainer container)
+                            {
+                                return container
+                                    .Padding(4)
+                                    .BorderBottom(1)
+                                    .BorderColor(Colors.Grey.Lighten3);
+                            }
+                        }
+                    });
+
+                    page.Footer()
+                        .AlignRight()
+                        .Text(footer =>
+                        {
+                            footer.Span("Page ");
+                            footer.CurrentPageNumber();
+                            footer.Span(@"/");
+                            footer.TotalPages();
+                        });
+                });
+            });
+
+            return report.GeneratePdf();
         }
 
         private IEnumerable<UserAttribute> MapAttributesFromInput(IEnumerable<UserAttributeInput> attributes)

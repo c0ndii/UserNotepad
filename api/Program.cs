@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using NLog;
 using NLog.Web;
+using QuestPDF.Infrastructure;
 using System.Text;
 using UserNotepad.Entities;
 using UserNotepad.Filters;
@@ -19,6 +20,8 @@ var logger = LogManager.Setup().LoadConfigurationFromFile("nlog.config").GetCurr
 try
 {
     var builder = WebApplication.CreateBuilder(args);
+
+    QuestPDF.Settings.License = LicenseType.Community;
 
     builder.Services.AddCors(options =>
     {

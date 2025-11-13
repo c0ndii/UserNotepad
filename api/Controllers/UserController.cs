@@ -66,5 +66,17 @@ namespace UserNotepad.Controllers
                 return NotFound();
             return NoContent();
         }
+
+        [HttpGet("report")]
+        public async Task<IActionResult> GetReport(CancellationToken cancellationToken)
+        {
+            var generationDateTime = DateTime.UtcNow;
+
+            var report = await _userService.GetReport(generationDateTime, cancellationToken);
+
+            var fileName = $"{generationDateTime:dd-MM-yyyy_HH-mm-ss}.pdf";
+
+            return File(report, "application/pdf", fileName);
+        }
     }
 }

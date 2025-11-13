@@ -1,10 +1,19 @@
-import { Box, Button, Typography } from "@mui/material";
+import { Box, Button, Typography, CircularProgress } from "@mui/material";
 import { UsersTable } from "../components/UsersTable";
 import { useState } from "react";
 import { UserModal } from "../components/UserModal";
+import { useUserReport } from "../hooks/useGetReport";
 
 export const NotepadPage = () => {
+  const { isFetching, refetch } = useUserReport();
   const [openModal, setOpenModal] = useState(false);
+
+  const handleGenerateReport = async () => {
+    const result = await refetch();
+    if (result.data?.url) {
+      window.open(result.data.url, "_blank");
+    }
+  };
 
   return (
     <Box sx={{ width: "80%" }}>
@@ -23,7 +32,17 @@ export const NotepadPage = () => {
           <Button onClick={() => setOpenModal(true)} variant="contained">
             Add user
           </Button>
-          <Button variant="contained">Generate report</Button>
+          <Button
+            onClick={handleGenerateReport}
+            disabled={isFetching}
+            variant="contained"
+          >
+            {isFetching ? (
+              <CircularProgress size={24} color="inherit" />
+            ) : (
+              "Generate report"
+            )}
+          </Button>
         </Box>
       </Box>
       <UsersTable />
