@@ -25,19 +25,17 @@ namespace UserNotepad.Services
         private readonly AppDbContext _context;
         private readonly Jwt _jwtSettings;
         private readonly IPasswordHasher<Operator> _passwordHasher;
-        private readonly ILogger<AuthService> _logger;
 
-        public AuthService(AppDbContext context, IOptions<Jwt> jwtSettings, IPasswordHasher<Operator> passwordHasher, ILogger<AuthService> logger)
+        public AuthService(AppDbContext context, IOptions<Jwt> jwtSettings, IPasswordHasher<Operator> passwordHasher)
         {
             this._context = context;
             this._jwtSettings = jwtSettings.Value;
             this._passwordHasher = passwordHasher;
-            this._logger = logger;
         }
 
         public async Task<LoginDto?> Login(LoginInput input, CancellationToken cancellationToken)
         {
-            var operatorLogin = await _context.Operators.SingleOrDefaultAsync(x => x.Username == input.Username, cancellationToken);
+            var operatorLogin = await _context.Operators.AsNoTracking().SingleOrDefaultAsync(x => x.Username == input.Username, cancellationToken);
             if (operatorLogin is null)
                 return null;
 

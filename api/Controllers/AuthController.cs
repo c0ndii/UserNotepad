@@ -15,13 +15,11 @@ namespace UserNotepad.Controllers
     {
         private readonly IAuthService _authService;
         private readonly IHttpContextAccessor _contextAccessor;
-        private readonly ILogger<AuthController> _logger;
 
-        public AuthController(IAuthService authService, IHttpContextAccessor contextAccessor, ILogger<AuthController> logger)
+        public AuthController(IAuthService authService, IHttpContextAccessor contextAccessor)
         {
             this._authService = authService;
             this._contextAccessor = contextAccessor;
-            this._logger = logger;
         }
 
         [HttpPost("register")]

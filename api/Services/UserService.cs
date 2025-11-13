@@ -21,12 +21,10 @@ namespace UserNotepad.Services
     public class UserService : IUserService
     {
         private readonly AppDbContext _context;
-        private readonly ILogger<IUserService> _logger;
 
-        public UserService(AppDbContext context, ILogger<IUserService> logger)
+        public UserService(AppDbContext context)
         {
             this._context = context;
-            this._logger = logger;
         }
 
         public async Task<PageDto<UserDto>> GetAllUsers(PageInput pageRequest, CancellationToken cancellationToken)
@@ -36,6 +34,7 @@ namespace UserNotepad.Services
             var totalCount = await query.CountAsync();
 
             var users = await query
+                .AsNoTracking()
                 .OrderBy(x => x.CreatedAt)
                 .Skip((pageRequest.Page - 1) * pageRequest.PageSize)
                 .Take(pageRequest.PageSize)
@@ -54,6 +53,7 @@ namespace UserNotepad.Services
         public async Task<UserDto?> GetUser(Guid id, CancellationToken cancellationToken)
         {
             var user = await _context.Users.Include(x => x.Attributes)
+                .AsNoTracking()
                 .SingleOrDefaultAsync(x => x.ID == id, cancellationToken);
 
             if (user is null)
@@ -143,7 +143,7 @@ namespace UserNotepad.Services
 
         public async Task<byte[]> GetReport(DateTime generationDateTime, CancellationToken cancellationToken)
         {
-            var users = await _context.Users.Include(x => x.Attributes).ToListAsync(cancellationToken);
+            var users = await _context.Users.Include(x => x.Attributes).AsNoTracking().ToListAsync(cancellationToken);
 
             var report = Document.Create(doc =>
             {
@@ -153,7 +153,7 @@ namespace UserNotepad.Services
                     page.Margin(20);
                     page.Header()
                         .Text($"Users report, \ngenerated: {generationDateTime:dd-MM-yyyy HH:mm:ss} UTC")
-                        .FontSize(24)
+                        .FontSize(16)
                         .Bold();
 
                     page.DefaultTextStyle(x => x.FontSize(10));
