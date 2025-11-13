@@ -35,7 +35,9 @@ namespace UserNotepad.Services
 
         public async Task<LoginDto?> Login(LoginInput input, CancellationToken cancellationToken)
         {
-            var operatorLogin = await _context.Operators.AsNoTracking().SingleOrDefaultAsync(x => x.Username == input.Username, cancellationToken);
+            var operatorLogin = await _context.Operators
+                .AsNoTracking()
+                .SingleOrDefaultAsync(x => x.Username == input.Username, cancellationToken);
             if (operatorLogin is null)
                 return null;
 

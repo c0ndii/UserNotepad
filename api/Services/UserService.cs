@@ -29,7 +29,9 @@ namespace UserNotepad.Services
 
         public async Task<PageDto<UserDto>> GetAllUsers(PageInput pageRequest, CancellationToken cancellationToken)
         {
-            var query = _context.Users.Include(x => x.Attributes).AsQueryable();
+            var query = _context.Users
+                .Include(x => x.Attributes)
+                .AsQueryable();
 
             var totalCount = await query.CountAsync();
 
@@ -52,7 +54,8 @@ namespace UserNotepad.Services
 
         public async Task<UserDto?> GetUser(Guid id, CancellationToken cancellationToken)
         {
-            var user = await _context.Users.Include(x => x.Attributes)
+            var user = await _context.Users
+                .Include(x => x.Attributes)
                 .AsNoTracking()
                 .SingleOrDefaultAsync(x => x.ID == id, cancellationToken);
 
@@ -91,9 +94,14 @@ namespace UserNotepad.Services
             dbUser.BirthDate = user.BirthDate;
             dbUser.Sex = user.Sex;
 
-            var attributes = await _context.Attributes.Where(x => x.UserID == id).ToListAsync(cancellationToken);
+            var attributes = await _context.Attributes
+                .Where(x => x.UserID == id)
+                .ToListAsync(cancellationToken);
 
-            var toRemove = attributes.Where(x => !user.Attributes.Any(y => y.Key == x.Key)).ToList();
+            var toRemove = attributes
+                .Where(x => !user.Attributes
+                    .Any(y => y.Key == x.Key))
+                .ToList();
             var toAdd = new List<UserAttribute>();
 
             foreach (var attribute in user.Attributes)
@@ -143,7 +151,11 @@ namespace UserNotepad.Services
 
         public async Task<byte[]> GetReport(DateTime generationDateTime, CancellationToken cancellationToken)
         {
-            var users = await _context.Users.Include(x => x.Attributes).AsNoTracking().ToListAsync(cancellationToken);
+            var users = await _context.Users
+                .Include(x => x.Attributes)
+                .OrderBy(x => x.CreatedAt)
+                .AsNoTracking()
+                .ToListAsync(cancellationToken);
 
             var report = Document.Create(doc =>
             {
@@ -152,7 +164,7 @@ namespace UserNotepad.Services
                     page.Size(PageSizes.A4);
                     page.Margin(20);
                     page.Header()
-                        .Text($"Users report, \ngenerated: {generationDateTime:dd-MM-yyyy HH:mm:ss} UTC")
+                        .Text($"Users report, \ngenerated: {generationDateTime:dd.MM.yyyy HH:mm:ss} UTC")
                         .FontSize(16)
                         .Bold();
 
@@ -209,12 +221,12 @@ namespace UserNotepad.Services
                             table.Cell().Element(CellBodyStyle).Text(user.Name);
                             table.Cell().Element(CellBodyStyle).Text(user.Surname);
 
-                            var age = DateTime.UtcNow.Year - user.BirthDate.Year;
-                            if (DateTime.UtcNow.Date < user.BirthDate.AddYears(age)) 
-                                age--;
+                            var today = DateOnly.FromDateTime(DateTime.UtcNow);
+                            var age = today.Year - user.BirthDate.Year - (today < user.BirthDate.AddYears(today.Year - user.BirthDate.Year) ? 1 : 0);
+
                             table.Cell().Element(CellBodyStyle).Text(age.ToString());
 
-                            table.Cell().Element(CellBodyStyle).Text(user.BirthDate.ToString("dd-MM-yyyy"));
+                            table.Cell().Element(CellBodyStyle).Text(user.BirthDate.ToString("dd.MM.yyyy"));
                             table.Cell().Element(CellBodyStyle).Text(user.Sex.ToString());
 
                             var attrSummary = user.Attributes.Any()
@@ -222,8 +234,8 @@ namespace UserNotepad.Services
                                 {
                                     string formattedValue = a.ValueType switch
                                     {
-                                        AttributeTypeEnum.@DateTime => DateTime.TryParse(a.Value, out var dt)
-                                                                      ? dt.ToString("dd-MM-yyyy")
+                                        AttributeTypeEnum.@Date => DateOnly.TryParse(a.Value, out var dt)
+                                                                      ? dt.ToString("dd.MM.yyyy")
                                                                       : a.Value,
                                         AttributeTypeEnum.@bool => bool.TryParse(a.Value, out var b) ? b.ToString() : a.Value,
                                         AttributeTypeEnum.@double => double.TryParse(a.Value, out var d) ? d.ToString() : a.Value,

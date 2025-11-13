@@ -35,8 +35,14 @@ const attributeSchema = z
   });
 
 const userSchema = z.object({
-  name: z.string().min(1, "Name is required"),
-  surname: z.string().min(1, "Surname is required"),
+  name: z
+    .string()
+    .min(1, "Name is required")
+    .regex(/^\p{L}+$/u, "Only letters are allowed"),
+  surname: z
+    .string()
+    .min(1, "Surname is required")
+    .regex(/^\p{L}+$/u, "Only letters are allowed"),
   birthDate: z
     .string()
     .min(1, "Birth date is required")
@@ -168,7 +174,7 @@ export const UserModal = ({ open, onClose, userId }: UserModalProps) => {
             )}
           />
         );
-      case AttrEnum.DateTime:
+      case AttrEnum.Date:
         return (
           <Controller
             name={`attributes.${index}.value`}
@@ -321,9 +327,7 @@ export const UserModal = ({ open, onClose, userId }: UserModalProps) => {
                           <MenuItem value={AttrEnum.double}>Double</MenuItem>
                           <MenuItem value={AttrEnum.bool}>Bool</MenuItem>
                           <MenuItem value={AttrEnum.string}>String</MenuItem>
-                          <MenuItem value={AttrEnum.DateTime}>
-                            DateTime
-                          </MenuItem>
+                          <MenuItem value={AttrEnum.Date}>Date</MenuItem>
                         </TextField>
                       )}
                     />

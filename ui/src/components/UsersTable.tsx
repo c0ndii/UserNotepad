@@ -15,6 +15,7 @@ import { theme } from "../main";
 import { formatSex } from "../helpers/sexHelper";
 import { useState } from "react";
 import { UserModal } from "./UserModal";
+import { AttributeTypeEnum } from "../types/user";
 
 export const UsersTable = () => {
   const { users, totalCount, page, pageSize, setPage, isLoading } =
@@ -134,7 +135,10 @@ export const UsersTable = () => {
                 <TableCell>
                   {user.attributes?.map((a, index) => (
                     <span key={index}>
-                      <strong>{a.key}</strong>: {a.value}
+                      <strong>{a.key}</strong>:{" "}
+                      {a.valueType === AttributeTypeEnum.Date
+                        ? new Date(a.value).toLocaleDateString()
+                        : a.value}
                       {index < user.attributes!.length - 1 ? ", " : ""}
                     </span>
                   ))}

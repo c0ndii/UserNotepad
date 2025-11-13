@@ -72,7 +72,7 @@ namespace UserNotepad.Controllers
 
             var report = await _userService.GetReport(generationDateTime, cancellationToken);
 
-            var fileName = $"{generationDateTime:dd-MM-yyyy_HH-mm-ss}.pdf";
+            var fileName = $"{generationDateTime:dd.MM.yyyy_HH-mm-ss}.pdf";
 
             Response.Headers["Content-Disposition"] = $"inline; filename=\"{fileName}\"";
             Response.Headers["Access-Control-Expose-Headers"] = "Content-Disposition";

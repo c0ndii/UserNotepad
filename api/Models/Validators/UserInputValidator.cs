@@ -13,7 +13,7 @@ namespace UserNotepad.Models.Validators
                 .MaximumLength(150).WithMessage("Surname must not exceed length of 150!")
                 .Matches(@"^[\p{L}]+$").WithMessage("Surname can contain only letters!");
             RuleFor(x => x.BirthDate).NotEmpty().WithMessage("Birth date is required!")
-                .LessThan(DateTime.Now).WithMessage("Birth date can not be set in future!");
+                .LessThan(DateOnly.FromDateTime(DateTime.UtcNow)).WithMessage("Birth date can not be set in future!");
             RuleFor(x => x.Attributes).Must(HaveUniqueKeys).WithMessage("Key value of attribute can not be duplicated!");
         }
 

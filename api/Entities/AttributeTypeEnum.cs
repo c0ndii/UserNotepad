@@ -6,6 +6,6 @@
         @double,
         @bool,
         @string,
-        @DateTime,
+        @Date,
     }
 }

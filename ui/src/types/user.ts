@@ -9,7 +9,7 @@ export enum AttributeTypeEnum {
   double = 1,
   bool = 2,
   string = 3,
-  DateTime = 4,
+  Date = 4,
 }
 
 export interface UserAttributeDto {
