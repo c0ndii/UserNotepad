@@ -8,13 +8,6 @@ export const NotepadPage = () => {
   const { isFetching, refetch } = useUserReport();
   const [openModal, setOpenModal] = useState(false);
 
-  const handleGenerateReport = async () => {
-    const result = await refetch();
-    if (result.data?.url) {
-      window.open(result.data.url, "_blank");
-    }
-  };
-
   return (
     <Box sx={{ width: "80%" }}>
       <Box
@@ -33,7 +26,7 @@ export const NotepadPage = () => {
             Add user
           </Button>
           <Button
-            onClick={handleGenerateReport}
+            onClick={() => refetch()}
             disabled={isFetching}
             variant="contained"
           >

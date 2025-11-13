@@ -76,7 +76,10 @@ namespace UserNotepad.Controllers
 
             var fileName = $"{generationDateTime:dd-MM-yyyy_HH-mm-ss}.pdf";
 
-            return File(report, "application/pdf", fileName);
+            Response.Headers["Content-Disposition"] = $"inline; filename=\"{fileName}\"";
+            Response.Headers["Access-Control-Expose-Headers"] = "Content-Disposition";
+
+            return File(report, "application/pdf");
         }
     }
 }

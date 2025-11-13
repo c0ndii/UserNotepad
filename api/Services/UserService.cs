@@ -157,13 +157,15 @@ namespace UserNotepad.Services
                         .Bold();
 
                     page.DefaultTextStyle(x => x.FontSize(10));
-                    page.Content().PaddingVertical(10).Table(table =>
+                    page.Content().Padding(10).Table(table =>
                     {
                         table.ColumnsDefinition(columns =>
                         {
-                            columns.ConstantColumn(30);  
+                            columns.ConstantColumn(30);
+                            columns.ConstantColumn(30);
                             columns.RelativeColumn(1.5f); 
-                            columns.RelativeColumn(1.5f); 
+                            columns.RelativeColumn(1.5f);
+                            columns.RelativeColumn(0.8f);
                             columns.RelativeColumn(1);   
                             columns.RelativeColumn(0.8f); 
                             columns.RelativeColumn(4);  
@@ -172,8 +174,10 @@ namespace UserNotepad.Services
                         table.Header(header =>
                         {
                             header.Cell().Element(CellHeaderStyle).Text("#").AlignStart();
+                            header.Cell().Element(CellHeaderStyle).Text("Title").AlignStart();
                             header.Cell().Element(CellHeaderStyle).Text("Name").AlignStart();
                             header.Cell().Element(CellHeaderStyle).Text("Surname").AlignStart();
+                            header.Cell().Element(CellHeaderStyle).Text("Age").AlignStart();
                             header.Cell().Element(CellHeaderStyle).Text("Birth Date").AlignStart();
                             header.Cell().Element(CellHeaderStyle).Text("Sex").AlignStart();
                             header.Cell().Element(CellHeaderStyle).Text("Attributes").AlignStart();
@@ -193,8 +197,23 @@ namespace UserNotepad.Services
                         foreach (var user in users)
                         {
                             table.Cell().Element(CellBodyStyle).Text(i++.ToString());
+
+                            var title = user.Sex switch
+                            {
+                                SexEnum.Male => "Mr.",
+                                SexEnum.Female => "Ms.",
+                                _ => "Mx."
+                            };
+                            table.Cell().Element(CellBodyStyle).Text(title);
+
                             table.Cell().Element(CellBodyStyle).Text(user.Name);
                             table.Cell().Element(CellBodyStyle).Text(user.Surname);
+
+                            var age = DateTime.UtcNow.Year - user.BirthDate.Year;
+                            if (DateTime.UtcNow.Date < user.BirthDate.AddYears(age)) 
+                                age--;
+                            table.Cell().Element(CellBodyStyle).Text(age.ToString());
+
                             table.Cell().Element(CellBodyStyle).Text(user.BirthDate.ToString("dd-MM-yyyy"));
                             table.Cell().Element(CellBodyStyle).Text(user.Sex.ToString());
 
