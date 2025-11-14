@@ -23,25 +23,22 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { AttributeTypeEnum as AttrEnum } from "../types/user";
 import { useSnackbar } from "../hooks/useSnackbar";
 
-const attributeSchema = z
-  .object({
-    key: z.string().optional(),
-    value: z.string().optional(),
-    valueType: z.enum(AttrEnum),
-  })
-  .refine((data) => !(data.key && !data.value), {
-    message: "Value is required when key is filled",
-    path: ["value"],
-  });
+const attributeSchema = z.object({
+  key: z.string().min(1, { message: "Key is required!" }),
+  value: z.string().min(1, { message: "Value is required!" }),
+  valueType: z.enum(AttrEnum, { message: "Value type is required!" }),
+});
 
 const userSchema = z.object({
   name: z
     .string()
     .min(1, "Name is required")
+    .max(50, "Name must be at most 50 characters")
     .regex(/^\p{L}+$/u, "Only letters are allowed"),
   surname: z
     .string()
     .min(1, "Surname is required")
+    .max(150, "Surname must be at most 150 characters")
     .regex(/^\p{L}+$/u, "Only letters are allowed"),
   birthDate: z
     .string()
@@ -263,6 +260,7 @@ export const UserModal = ({ open, onClose, userId }: UserModalProps) => {
                   label="Birth Date"
                   error={!!errors.birthDate}
                   helperText={errors.birthDate?.message}
+                  slotProps={{ inputLabel: { shrink: true } }}
                   {...field}
                 />
               )}
@@ -307,6 +305,7 @@ export const UserModal = ({ open, onClose, userId }: UserModalProps) => {
                           fullWidth
                           label="Key"
                           error={!!errors.attributes?.[index]?.key}
+                          helperText={errors.attributes?.[index]?.key?.message}
                           {...field}
                           onChange={(e) => {
                             field.onChange(e);

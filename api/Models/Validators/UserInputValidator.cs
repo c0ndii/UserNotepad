@@ -12,9 +12,12 @@ namespace UserNotepad.Models.Validators
             RuleFor(x => x.Surname).NotEmpty().WithMessage("Surname is required!")
                 .MaximumLength(150).WithMessage("Surname must not exceed length of 150!")
                 .Matches(@"^[\p{L}]+$").WithMessage("Surname can contain only letters!");
-            RuleFor(x => x.BirthDate).NotEmpty().WithMessage("Birth date is required!")
-                .LessThan(DateOnly.FromDateTime(DateTime.UtcNow)).WithMessage("Birth date can not be set in future!");
+            RuleFor(x => x.BirthDate).NotNull().WithMessage("Birth date is required!")
+                .LessThanOrEqualTo(DateOnly.FromDateTime(DateTime.UtcNow)).WithMessage("Birth date can not be set in future!");
+            RuleFor(x => x.Sex).NotNull().WithMessage("Sex is required!");
             RuleFor(x => x.Attributes).Must(HaveUniqueKeys).WithMessage("Key value of attribute can not be duplicated!");
+            RuleForEach(x => x.Attributes)
+                .SetValidator(new UserAttributeInputValidator());
         }
 
         private bool HaveUniqueKeys(IEnumerable<UserAttributeInput> attributes)

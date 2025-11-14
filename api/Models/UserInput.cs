@@ -4,10 +4,10 @@ namespace UserNotepad.Models
 {
     public class UserInput
     {
-        public required string Name { get; set; }
-        public required string Surname { get; set; }
-        public required DateOnly BirthDate { get; set; }
-        public required SexEnum Sex { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public string Surname { get; set; } = string.Empty;
+        public DateOnly? BirthDate { get; set; } = null;
+        public SexEnum? Sex { get; set; } = null;
         public IEnumerable<UserAttributeInput> Attributes { get; set; } = new List<UserAttributeInput>();
     }
 }

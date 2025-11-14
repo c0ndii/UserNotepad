@@ -2,9 +2,9 @@
 {
     public class RegisterInput
     {
-        public required string Nickname { get; set; }
-        public required string Username { get; set; }
-        public required string Password { get; set; }
-        public required string RepeatPassword {  get; set; }
+        public string Nickname { get; set; } = string.Empty;
+        public string Username { get; set; } = string.Empty;
+        public string Password { get; set; } = string.Empty;
+        public string RepeatPassword {  get; set; } = string.Empty;
     }
 }

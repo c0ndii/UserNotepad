@@ -12,7 +12,7 @@ namespace UserNotepad.Seeders
             {
                 var users = new List<User>
                 {
-                    new User { Name = "Maria", Surname = "Skłodowska-Curie", BirthDate = new DateOnly(1867, 11, 7), Sex = SexEnum.Female },
+                    new User { Name = "Maria", Surname = "Skłodowska", BirthDate = new DateOnly(1867, 11, 7), Sex = SexEnum.Female },
                     new User { Name = "Fryderyk", Surname = "Chopin", BirthDate = new DateOnly(1810, 3, 1), Sex = SexEnum.Male },
                     new User { Name = "Jan", Surname = "Matejko", BirthDate = new DateOnly(1838, 6, 24), Sex = SexEnum.Male },
                     new User { Name = "Lech", Surname = "Wałęsa", BirthDate = new DateOnly(1943, 9, 29), Sex = SexEnum.Male },

@@ -4,8 +4,8 @@ namespace UserNotepad.Models
 {
     public class UserAttributeInput
     {
-        public required string Key { get; set; }
-        public required string Value { get; set; }
-        public required AttributeTypeEnum ValueType { get; set; }
+        public string Key { get; set; } = string.Empty;
+        public string Value { get; set; } = string.Empty;
+        public AttributeTypeEnum? ValueType { get; set; } = null;
     }
 }

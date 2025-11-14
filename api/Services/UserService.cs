@@ -70,8 +70,8 @@ namespace UserNotepad.Services
             {
                 Name = user.Name,
                 Surname = user.Surname,
-                BirthDate = user.BirthDate,
-                Sex = user.Sex,
+                BirthDate = user.BirthDate!.Value,
+                Sex = user.Sex!.Value,
             };
 
             if (user.Attributes is not null)
@@ -91,8 +91,8 @@ namespace UserNotepad.Services
 
             dbUser.Name = user.Name;
             dbUser.Surname = user.Surname;
-            dbUser.BirthDate = user.BirthDate;
-            dbUser.Sex = user.Sex;
+            dbUser.BirthDate = user.BirthDate!.Value;
+            dbUser.Sex = user.Sex!.Value;
 
             var attributes = await _context.Attributes
                 .Where(x => x.UserID == id)
@@ -110,7 +110,7 @@ namespace UserNotepad.Services
                 if (existingAttribute is not null)
                 {
                     existingAttribute.Value = attribute.Value;
-                    existingAttribute.ValueType = attribute.ValueType;
+                    existingAttribute.ValueType = attribute.ValueType!.Value;
                 }
                 else
                 {
@@ -118,7 +118,7 @@ namespace UserNotepad.Services
                     {
                         Key = attribute.Key,
                         Value = attribute.Value,
-                        ValueType = attribute.ValueType,
+                        ValueType = attribute.ValueType!.Value,
                         UserID = dbUser.ID,
                         User = dbUser
                     });
@@ -281,7 +281,7 @@ namespace UserNotepad.Services
                 {
                     Key = x.Key,
                     Value = x.Value,
-                    ValueType = x.ValueType,
+                    ValueType = x.ValueType!.Value,
                 }).ToList();
         }
 

@@ -8,7 +8,7 @@ namespace UserNotepad.Models.Validators
         {
             RuleFor(x => x.Key).NotEmpty().WithMessage("Key is required!");
             RuleFor(x => x.Value).NotEmpty().WithMessage("Value is required!");
-            RuleFor(x => x.ValueType).NotEmpty().WithMessage("Value type is required!");
+            RuleFor(x => x.ValueType).NotNull().WithMessage("Value type is required!");
         }
     }
 }
