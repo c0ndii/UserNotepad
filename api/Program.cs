@@ -12,6 +12,7 @@ using UserNotepad.Filters;
 using UserNotepad.Middlewares;
 using UserNotepad.Models;
 using UserNotepad.Models.Validators;
+using UserNotepad.Seeders;
 using UserNotepad.Services;
 using UserNotepad.Settings;
 
@@ -89,6 +90,15 @@ try
     {
         app.UseSwagger();
         app.UseSwaggerUI();
+    }
+
+    using (var scope = app.Services.CreateScope())
+    {
+        var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        var passwordHasher = scope.ServiceProvider.GetRequiredService<IPasswordHasher<Operator>>();
+
+        context.Database.Migrate();
+        await DbSeeder.Seed(context, passwordHasher);  
     }
 
     app.UseHttpsRedirection();
