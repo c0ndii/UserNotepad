@@ -12,3 +12,7 @@
 
 ### Endpoints
 - `/swagger`
+
+### Default operator credentials
+- `login: admin`
+- `password: admin12345`

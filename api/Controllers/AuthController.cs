@@ -1,8 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.IdentityModel.Tokens;
 using System.Security.Claims;
-using UserNotepad.Entities;
 using UserNotepad.Models;
 using UserNotepad.Services;
 
