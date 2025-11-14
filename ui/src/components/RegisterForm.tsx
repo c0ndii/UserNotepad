@@ -58,7 +58,7 @@ export const RegisterForm = ({ onSuccess }: RegisterFormProps) => {
         return;
       }
 
-      showMessage("Error occured", "error");
+      showMessage("Error occurred", "error");
       console.log(error);
     }
   };

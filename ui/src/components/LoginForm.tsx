@@ -50,7 +50,7 @@ export const LoginForm = ({ onSuccess }: LoginFormProps) => {
         showMessage("Wrong username or password!", "warning");
         return;
       }
-      showMessage("Error occured", "error");
+      showMessage("Error occurred", "error");
       console.log(error);
     }
   };

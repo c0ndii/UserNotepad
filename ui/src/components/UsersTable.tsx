@@ -9,13 +9,16 @@ import {
   TablePagination,
   CircularProgress,
   Box,
+  IconButton,
 } from "@mui/material";
+import DeleteIcon from "@mui/icons-material/Delete";
 import { useGetUsers } from "../hooks/useGetUsers";
 import { theme } from "../main";
 import { formatSex } from "../helpers/sexHelper";
 import { useState } from "react";
 import { UserModal } from "./UserModal";
 import { AttributeTypeEnum } from "../types/user";
+import { ConfirmDeleteModal } from "./ConfirmDeleteModal";
 
 export const UsersTable = () => {
   const { users, totalCount, page, pageSize, setPage, isLoading } =
@@ -24,7 +27,11 @@ export const UsersTable = () => {
   const [selectedUserId, setSelectedUserId] = useState<string | undefined>(
     undefined
   );
-  const [modalOpen, setModalOpen] = useState(false);
+  const [userModalOpen, setUserModalOpen] = useState(false);
+
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [deleteUserId, setDeleteUserId] = useState<string | null>(null);
+  const [deleteUserFullName, setDeleteUserFullName] = useState<string>("");
 
   const handleChangePage = (_event: unknown, newPage: number) => {
     setPage(newPage + 1);
@@ -32,12 +39,24 @@ export const UsersTable = () => {
 
   const handleRowClick = (id: string) => {
     setSelectedUserId(id);
-    setModalOpen(true);
+    setUserModalOpen(true);
   };
 
-  const handleCloseModal = () => {
-    setModalOpen(false);
+  const handleCloseUserModal = () => {
+    setUserModalOpen(false);
     setSelectedUserId(undefined);
+  };
+
+  const handleOpenDeleteModal = (
+    id: string,
+    name: string,
+    surname: string,
+    e: React.MouseEvent
+  ) => {
+    e.stopPropagation();
+    setDeleteUserId(id);
+    setDeleteUserFullName(`${name} ${surname}`);
+    setDeleteModalOpen(true);
   };
 
   if (isLoading) {
@@ -111,6 +130,16 @@ export const UsersTable = () => {
               >
                 Attributes
               </TableCell>
+              <TableCell
+                sx={{
+                  backgroundColor: theme.palette.primary.main,
+                  color: "#fff",
+                  fontWeight: "bold",
+                  fontSize: "1rem",
+                }}
+              >
+                Actions
+              </TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -143,6 +172,24 @@ export const UsersTable = () => {
                     </span>
                   ))}
                 </TableCell>
+                <TableCell>
+                  <IconButton
+                    onClick={(e) =>
+                      handleOpenDeleteModal(user.id, user.name, user.surname, e)
+                    }
+                    sx={{
+                      borderRadius: 2,
+                      color: theme.palette.error.main,
+                      transition: "0.2s",
+                      "&:hover": {
+                        backgroundColor: "rgba(211, 47, 47, 0.15)",
+                        color: theme.palette.error.dark,
+                      },
+                    }}
+                  >
+                    <DeleteIcon color="error" />
+                  </IconButton>
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>
@@ -164,13 +211,20 @@ export const UsersTable = () => {
         rowsPerPage={pageSize}
         rowsPerPageOptions={[pageSize]}
       />
-      {modalOpen && (
+      {userModalOpen && (
         <UserModal
-          open={modalOpen}
-          onClose={handleCloseModal}
+          open={userModalOpen}
+          onClose={handleCloseUserModal}
           userId={selectedUserId}
         />
       )}
+
+      <ConfirmDeleteModal
+        open={deleteModalOpen}
+        onClose={() => setDeleteModalOpen(false)}
+        id={deleteUserId!}
+        fullName={deleteUserFullName}
+      />
     </Box>
   );
 };

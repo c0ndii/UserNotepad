@@ -36,7 +36,7 @@ namespace UserNotepad.Middlewares
                 _logger.LogError(ex, "Unhandled exception!");
 
                 context.Response.StatusCode = StatusCodes.Status500InternalServerError;
-                await context.Response.WriteAsync("Internal server error occured");
+                await context.Response.WriteAsync("Internal server error occurred");
             }
         }
     }
