@@ -8,7 +8,7 @@
 
 ### Frontend (React + Vite)
 1. `pnpm install`
-2. `pnpm vite
+2. `pnpm vite`
 
 ### Endpoints
 - `/swagger`
