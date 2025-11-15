@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Any;
 using NLog;
 using NLog.Web;
 using QuestPDF.Infrastructure;
@@ -63,7 +64,15 @@ try
     });
 
     builder.Services.AddEndpointsApiExplorer();
-    builder.Services.AddSwaggerGen();
+    builder.Services.AddSwaggerGen(x =>
+    {
+        x.MapType<DateOnly>(() => new Microsoft.OpenApi.Models.OpenApiSchema
+        {
+            Type = "string",
+            Format = "date",
+            Example = new OpenApiString("1999-01-01")
+        });
+    });
 
     var dbConnectionString = builder.Configuration.GetConnectionString("appDb");
     if (dbConnectionString is null)

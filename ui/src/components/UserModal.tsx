@@ -23,11 +23,60 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { AttributeTypeEnum as AttrEnum } from "../types/user";
 import { useSnackbar } from "../hooks/useSnackbar";
 
-const attributeSchema = z.object({
-  key: z.string().min(1, { message: "Key is required!" }),
-  value: z.string().min(1, { message: "Value is required!" }),
-  valueType: z.enum(AttrEnum, { message: "Value type is required!" }),
-});
+const attributeSchema = z
+  .object({
+    key: z.string().min(1, { message: "Key is required!" }),
+    value: z.string().min(1, { message: "Value is required!" }),
+    valueType: z.enum(AttrEnum, { message: "Value type is required!" }),
+  })
+  .superRefine((attr, ctx) => {
+    const { value, valueType } = attr;
+
+    switch (valueType) {
+      case AttrEnum.int:
+        if (!/^-?\d+$/.test(value)) {
+          ctx.addIssue({
+            code: "custom",
+            message: "Value must be a valid integer!",
+            path: ["value"],
+          });
+        }
+        break;
+
+      case AttrEnum.double:
+        if (!/^-?\d+(\.\d+)?$/.test(value)) {
+          ctx.addIssue({
+            code: "custom",
+            message: "Value must be a valid double!",
+            path: ["value"],
+          });
+        }
+        break;
+
+      case AttrEnum.bool:
+        if (!["true", "false"].includes(value)) {
+          ctx.addIssue({
+            code: "custom",
+            message: "Value must be 'true' or 'false'!",
+            path: ["value"],
+          });
+        }
+        break;
+
+      case AttrEnum.Date:
+        if (isNaN(Date.parse(value))) {
+          ctx.addIssue({
+            code: "custom",
+            message: "Value must be a valid date!",
+            path: ["value"],
+          });
+        }
+        break;
+
+      default:
+        break;
+    }
+  });
 
 const userSchema = z.object({
   name: z
@@ -86,6 +135,7 @@ export const UserModal = ({ open, onClose, userId }: UserModalProps) => {
     reset,
     watch,
     trigger,
+    setValue,
     formState: { errors },
   } = useForm<UserForm>({
     resolver: zodResolver(userSchema),
@@ -164,7 +214,15 @@ export const UserModal = ({ open, onClose, userId }: UserModalProps) => {
             name={`attributes.${index}.value`}
             control={control}
             render={({ field }) => (
-              <TextField select label="Value" fullWidth {...field}>
+              <TextField
+                select
+                label="Value"
+                fullWidth
+                {...field}
+                error={!!errors.attributes?.[index]?.value}
+                helperText={errors.attributes?.[index]?.value?.message}
+                slotProps={{ inputLabel: { shrink: true } }}
+              >
                 <MenuItem value="true">True</MenuItem>
                 <MenuItem value="false">False</MenuItem>
               </TextField>
@@ -181,6 +239,8 @@ export const UserModal = ({ open, onClose, userId }: UserModalProps) => {
                 type="date"
                 label="Value"
                 fullWidth
+                error={!!errors.attributes?.[index]?.value}
+                helperText={errors.attributes?.[index]?.value?.message}
                 slotProps={{ inputLabel: { shrink: true } }}
                 {...field}
               />
@@ -194,7 +254,15 @@ export const UserModal = ({ open, onClose, userId }: UserModalProps) => {
             name={`attributes.${index}.value`}
             control={control}
             render={({ field }) => (
-              <TextField type="number" label="Value" fullWidth {...field} />
+              <TextField
+                type="number"
+                label="Value"
+                fullWidth
+                {...field}
+                error={!!errors.attributes?.[index]?.value}
+                helperText={errors.attributes?.[index]?.value?.message}
+                slotProps={{ inputLabel: { shrink: true } }}
+              />
             )}
           />
         );
@@ -204,7 +272,14 @@ export const UserModal = ({ open, onClose, userId }: UserModalProps) => {
             name={`attributes.${index}.value`}
             control={control}
             render={({ field }) => (
-              <TextField label="Value" fullWidth {...field} />
+              <TextField
+                label="Value"
+                fullWidth
+                {...field}
+                error={!!errors.attributes?.[index]?.value}
+                helperText={errors.attributes?.[index]?.value?.message}
+                slotProps={{ inputLabel: { shrink: true } }}
+              />
             )}
           />
         );
@@ -321,7 +396,20 @@ export const UserModal = ({ open, onClose, userId }: UserModalProps) => {
                       name={`attributes.${index}.valueType`}
                       control={control}
                       render={({ field }) => (
-                        <TextField select fullWidth label="Type" {...field}>
+                        <TextField
+                          select
+                          fullWidth
+                          label="Type"
+                          {...field}
+                          onChange={(e) => {
+                            const newType = e.target.value;
+                            field.onChange(newType);
+
+                            setValue(`attributes.${index}.value`, "");
+
+                            trigger(`attributes.${index}.value`);
+                          }}
+                        >
                           <MenuItem value={AttrEnum.int}>Int</MenuItem>
                           <MenuItem value={AttrEnum.double}>Double</MenuItem>
                           <MenuItem value={AttrEnum.bool}>Bool</MenuItem>
@@ -336,11 +424,6 @@ export const UserModal = ({ open, onClose, userId }: UserModalProps) => {
                     {renderValueInput(
                       watch(`attributes.${index}.valueType`) ?? AttrEnum.string,
                       index
-                    )}
-                    {errors.attributes?.[index]?.value && (
-                      <Typography color="error" variant="caption">
-                        {errors.attributes[index]?.value?.message}
-                      </Typography>
                     )}
                   </Grid>
                   {errors.attributes?.message && (
